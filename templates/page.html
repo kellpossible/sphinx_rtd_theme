@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+
+{% block documentbody %}
+    <h1>{{ page.title }}</h1>
+    {{ page.content | safe }}
+{% endblock documentbody %}
+
+{% block breadcrumbs %}
+    <li><a href="{{ master_index_page.permalink }}">{{ 'Docs' }}</a> &raquo;</li>
+    {# {% for doc in parents %} #}
+        {# <li><a href="{{ doc.link|e }}">{{ doc.title }}</a> &raquo;</li> #}
+    {# {% endfor %} #}
+    <li>{{ page.title }}</li>
+{% endblock %}
+
+
+{% block menu %}
+{% set index = master_index_page %}
+<ul class="current">
+    {% for index_child_page in index.pages %}
+        {% if current_path == index_child_page.path %}
+        {% set page_active = true %}
+        {% else %}
+        {% set page_active = false %}
+        {% endif %}
+            <li class="toctree-l1 {% if page_active %} current{% endif %}">
+                <a href="{{ index_child_page.permalink }}" class="reference internal{% if page_active %} active{% endif %}">
+                {{ index_child_page.title }}
+                </a>
+                test
+            </li>
+        {% endfor %}
+</ul>
+{# {% if global_toc %}
+    {{ global_toc }}
+{% else %}
+    <!-- Local TOC -->
+    <div class="local-toc">{{ toc }}</div>
+{% endif %} #}
+{% endblock %}

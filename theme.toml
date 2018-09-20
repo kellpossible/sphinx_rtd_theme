@@ -12,12 +12,13 @@ demo = ""
 # be merged with user data, some kind of prefix or nesting is preferable
 # Use snake_casing to be consistent with the rest of Gutenberg
 [extra.rtd]
+version = "latest"
+display_version = true
 pygments_style = "default"
 collapse_navigation = false
 sticky_navigation = true
 navigation_depth = 4
 include_hidden = true
-display_version = true
 prev_next_buttons_location = "bottom"
 style_external_links = false
 

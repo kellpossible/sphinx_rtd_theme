@@ -8,13 +8,13 @@
 {%- endif %}
 {%- set lang_attr = 'en' if language == None else (language | replace('_', '-')) %} #}
 
-{% set master_index_page = get_page(path="./_index.md") %}
+{% set master_index_page = get_section(path="_index.md") %}
 
 <!DOCTYPE html>
-<html class="no-js" lang="{{ lang_attr }}" >
+<html class="no-js" lang="en" >
 <head>
   <meta charset="utf-8">
-  {{ metatags }}
+  {# {{ metatags }} #}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% block htmltitle %}
   <title></title>
@@ -58,9 +58,9 @@
   {%- endfor %} #}
 
   {%- block linktags %}
-    {%- if get_page(path="about.md") %}
+    {# {%- if get_page(path="about.md") %}
     <link rel="author" title="{{ 'About these documents' }}" href="{{  get_url(path='./about.md') }}" />
-    {%- endif %}
+    {%- endif %} #}
     {# {%- if hasdoc('genindex') %}
     <link rel="index" title="{{ _('Index') }}" href="{{ pathto('genindex') }}" />
     {%- endif %} #}
@@ -91,11 +91,11 @@
         <div class="wy-side-nav-search">
           {% block sidebartitle %}
 
-          {# {% if logo and theme_logo_only %}
-            <a href="{{ pathto(master_index_page) }}">
-          {% else %}
-            <a href="{{ pathto(master_index_page) }}" class="icon icon-home"> {{ project }}
-          {% endif %} #}
+          {# {% if logo and theme_logo_only %} #}
+            {# <a href="{{ master_index_page.permalink }}"> #}
+          {# {% else %} #}
+            <a href="{{ master_index_page.permalink }}" class="icon icon-home"> {{ config.title }}
+          {# {% endif %} #}
 
           {% if logo %}
             {# Not strictly valid HTML, but it's the only way to display/scale
@@ -105,17 +105,22 @@
           {% endif %}
           </a>
 
-          {# {% if theme_display_version %}
-            {%- set nav_version = version %}
+          {% if config.extra.rtd.display_version %}
+            {# {%- set nav_version = version %}
             {% if READTHEDOCS and current_version %}
               {%- set nav_version = current_version %}
             {% endif %}
             {% if nav_version %}
               <div class="version">
                 {{ nav_version }}
-              </div>
-            {% endif %}
-          {% endif %} #}
+              </div> #}
+
+              <div class="version">
+                {{ config.extra.rtd.version }}
+              </div> 
+
+            {# {% endif %} #}
+          {% endif %}
 
           {# {% include "searchbox.html" %} #}
 
@@ -124,6 +129,22 @@
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           {% block menu %}
+            {% set index = master_index_page %}
+            <ul class="current">
+                {% for index_child_page in index.pages %}
+                  {% if current_path == index_child_page.path %}
+                    {% set page_active = true %}
+                  {% else %}
+                    {% set page_active = false %}
+                  {% endif %}
+                      <li class="toctree-l1 {% if page_active %} current{% endif %}">
+                          <a href="{{ index_child_page.permalink }}" class="reference internal{% if page_active %} active{% endif %}">
+                            {{ index_child_page.title }}
+                          </a>
+                          {{ index_child_page.toc }}
+                      </li>
+                  {% endfor %}
+            </ul>
             {# {% if global_toc %}
               {{ global_toc }}
             {% else %}
@@ -141,7 +162,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         {% block mobile_nav %}
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="{{ master_index_page.permalink }}">{{ project }}</a>
+          <a href="{{ master_index_page.permalink }}">{{ config.title }}</a>
         {% endblock %}
       </nav>
 
@@ -153,11 +174,68 @@
         {% else %}
         <div class="rst-content">
         {% endif %}
-          {% include "breadcrumbs.html" %}
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ul class="wy-breadcrumbs">
+              {% block breadcrumbs %}
+                <li><a href="{{ master_index_page.permalink }}">{{ 'Docs' }}</a> &raquo;</li>
+                  {# {% for doc in parents %} #}
+                    {# <li><a href="{{ doc.link|e }}">{{ doc.title }}</a> &raquo;</li> #}
+                  {# {% endfor %} #}
+                <li>{{ config.title }}</li>
+              {% endblock %}
+              {% block breadcrumbs_aside %}
+                <li class="wy-breadcrumbs-aside">
+                  {# {% if hasdoc(pagename) %}
+                      {% if display_github %}
+                      {% if check_meta and 'github_url' in meta %}
+                        <!-- User defined GitHub URL -->
+                        <a href="{{ meta['github_url'] }}" class="fa fa-github"> {{ _('Edit on GitHub') }}</a>
+                      {% else %}
+                        <a href="https://{{ github_host|default("github.com") }}/{{ github_user }}/{{ github_repo }}/{{ theme_vcs_pageview_mode|default("blob") }}/{{ github_version }}{{ conf_py_path }}{{ pagename }}{{ suffix }}" class="fa fa-github"> {{ _('Edit on GitHub') }}</a>
+                      {% endif %}
+                    {% elif display_bitbucket %}
+                      {% if check_meta and 'bitbucket_url' in meta %}
+                        <!-- User defined Bitbucket URL -->
+                        <a href="{{ meta['bitbucket_url'] }}" class="fa fa-bitbucket"> {{ _('Edit on Bitbucket') }}</a>
+                      {% else %}
+                        <a href="https://bitbucket.org/{{ bitbucket_user }}/{{ bitbucket_repo }}/src/{{ bitbucket_version}}{{ conf_py_path }}{{ pagename }}{{ suffix }}?mode={{ theme_vcs_pageview_mode|default("view") }}" class="fa fa-bitbucket"> {{ _('Edit on Bitbucket') }}</a>
+                      {% endif %}
+                    {% elif display_gitlab %}
+                      {% if check_meta and 'gitlab_url' in meta %}
+                        <!-- User defined GitLab URL -->
+                        <a href="{{ meta['gitlab_url'] }}" class="fa fa-gitlab"> {{ _('Edit on GitLab') }}</a>
+                      {% else %}
+                        <a href="https://{{ gitlab_host|default("gitlab.com") }}/{{ gitlab_user }}/{{ gitlab_repo }}/{{ theme_vcs_pageview_mode|default("blob") }}/{{ gitlab_version }}{{ conf_py_path }}{{ pagename }}{{ suffix }}" class="fa fa-gitlab"> {{ _('Edit on GitLab') }}</a>
+                      {% endif %}
+                    {% elif show_source and source_url_prefix %}
+                      <a href="{{ source_url_prefix }}{{ pagename }}{{ suffix }}">{{ _('View page source') }}</a>
+                    {% elif show_source and has_source and sourcename %}
+                      <a href="{{ pathto('_sources/' + sourcename, true)|e }}" rel="nofollow"> {{ _('View page source') }}</a>
+                    {% endif %}
+                  {% endif %} #}
+                </li>
+              {% endblock %}
+            </ul>
+
+            {% set buttons_location = "config.extra.rtd.prev_next_buttons_location" %}
+            {% set prev = true %}
+            {% set next = true %}
+            {% if buttons_location == "top" and prev or next %}
+            <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+                {% if next %}
+                  <a href="" class="btn btn-neutral float-right" title="next page" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+                {% endif %}
+                {% if prev %}
+                  <a href="" class="btn btn-neutral" title="previous page" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            <hr/>
+          </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
           {%- block document %}
            <div itemprop="articleBody">
-            {% block body %}{% endblock %}
+            {% block documentbody %}{% endblock %}
            </div>
            {# {% if self.comments()|trim %}
            <div class="articleComments">
@@ -166,7 +244,7 @@
            {% endif%} #}
           </div>
           {%- endblock %}
-          {% include "footer.html" %}
+          {# {% include "footer.html" %} #}
         </div>
       {%- endblock %}
       </div>
@@ -174,24 +252,23 @@
     </section>
 
   </div>
-  {% include "versions.html" %}
+  {# {% include "versions.html" %} #}
 
   {% if not embedded %}
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'{{ url_root }}',
-            VERSION:'{{ release|e }}',
-            LANGUAGE:'{{ language }}',
+            URL_ROOT:'{{ config.base_url }}',
+            VERSION:'{{ config.extra.rtd.version }}',
+            LANGUAGE:'en',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:false,
-            HAS_SOURCE:  {{ has_source|lower }},
-            SOURCELINK_SUFFIX: '{{ sourcelink_suffix }}'
+            {# HAS_SOURCE:  {{ has_source|lower }}, #}
+            {# SOURCELINK_SUFFIX: '{{ sourcelink_suffix }}' #}
         };
     </script>
-    {%- for scriptfile in script_files %}
-      <script type="text/javascript" src="{{ get_url(path='./js/theme.js') }}"></script>
-    {%- endfor %}
+    
+    <script type="text/javascript" src="{{ get_url(path='js/theme.js') }}"></script>
 
   {% endif %}
 
