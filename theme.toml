@@ -1,0 +1,35 @@
+name = "Zola ReadTheDocs Theme"
+description = "A port of the popular Sphinx ReadTheDocs theme"
+license = "MIT"
+homepage = "https://github.com/kellpossible/zola_rtd_theme"
+# The minimum version of Gutenberg required
+min_version = "0.4.0"
+# An optional live demo URL
+demo = ""
+
+# Any variable there can be overriden in the end user `config.toml`
+# You don't need to prefix variables by the theme name but as this will
+# be merged with user data, some kind of prefix or nesting is preferable
+# Use snake_casing to be consistent with the rest of Gutenberg
+[extra.rtd]
+pygments_style = "default"
+collapse_navigation = false
+sticky_navigation = true
+navigation_depth = 4
+include_hidden = true
+display_version = true
+prev_next_buttons_location = "bottom"
+style_external_links = false
+
+
+# The theme author info: you!
+[author]
+name = "Luke Frisken"
+homepage = "https://lukefrisken.com"
+
+# If this is porting a theme from another static site engine, provide
+# the info of the original author here
+[original]
+author =  "Dave Snider, Read the Docs, Inc. & contributors"
+homepage = "https://sphinx-rtd-theme.readthedocs.io/en/latest/"
+repo = "https://github.com/rtfd/sphinx_rtd_theme"
